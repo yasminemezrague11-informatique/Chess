@@ -89,14 +89,9 @@ MyChessSquare >> contents [
 MyChessSquare >> contents: aPiece [
 
 	| text |
-	contents := aPiece.
+	contents := aPiece ifNil: [ MyNullPiece new ].
 
-	text := contents
-		        ifNil: [
-			        color isBlack
-				        ifFalse: [ 'z' ]
-				        ifTrue: [ 'x' ] ]
-		        ifNotNil: [ contents renderPieceOn: self ].
+	text := contents renderPieceOn: self.
 	piece text: (text asRopedText
 			 fontSize: 48;
 			 foreground: self foreground;
@@ -112,7 +107,7 @@ MyChessSquare >> down [
 { #category : 'asd' }
 MyChessSquare >> emptyContents [
 	
-	self contents: nil
+	self contents: MyNullPiece new
 ]
 
 { #category : 'accessing' }
@@ -167,7 +162,8 @@ MyChessSquare >> initialize [
 		background: Color white;
 		geometry: BlSquareGeometry new.
 
-	self addEventHandlerOn: BlClickEvent do: [ :e | self click ]
+	self addEventHandlerOn: BlClickEvent do: [ :e | self click ].
+	contents := MyNullPiece new
 ]
 
 { #category : 'accessing' }
