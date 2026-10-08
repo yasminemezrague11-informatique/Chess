@@ -49,16 +49,15 @@ MyPiece >> canMoveTo: aSquare [
 MyPiece >> collectSquares: aBlock [
 
 	^ self collectSquares: aBlock legal: false
+	
+
 ]
 
 { #category : 'rendering' }
 MyPiece >> collectSquares: aBlock legal: shouldBeLegal [
 	^ self collectSquares: aBlock while: [ :aSquare |
 		aSquare notNil
-			and: [
-				shouldBeLegal not
-					or: [ aSquare hasPiece not ]
-			]
+			and: [ aSquare contents isPiece not ]
 	]
 ]
 
@@ -76,11 +75,8 @@ MyPiece >> collectSquares: collectBlock while: untilBlock [
 		].
 
 	next ifNotNil: [
-		next contents ifNotNil: [ :piece |
-			piece color ~= color
-				ifTrue: [
-					targets add: next
-				]
+		(next contents notNil and: [ next contents isPiece ]) ifTrue: [
+			targets add: next
 		]
 	].
 
@@ -114,7 +110,10 @@ MyPiece >> downFileLegal: aBoolean [
 	[ current isNotNil ] whileTrue: [
 		squares add: current.
 	
-		current contents ifNotNil: [ ^ squares ].
+		current contents isPiece ifTrue: [
+			current contents color ~= color ifTrue: [ squares add: current ].
+			^ squares
+		].
 		current := current down.
 	].
 	
