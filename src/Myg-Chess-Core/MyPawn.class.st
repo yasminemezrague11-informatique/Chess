@@ -24,7 +24,7 @@ MyPawn >> captureCandidates [
 { #category : 'helpers' }
 MyPawn >> captureMoves [
 	^ self captureCandidates select: [ :aSquare | 
-		aSquare hasPiece and: [ aSquare contents color ~= color ] ]
+		aSquare contents isPiece and: [ aSquare contents color ~= self color ] ]
 ]
 
 { #category : 'helpers' }
@@ -59,14 +59,14 @@ MyPawn >> straightMoves [
 	moves := OrderedCollection new.
 	nextSquare := self forwardSquare.
 	
-	(nextSquare notNil and: [ nextSquare hasPiece not ]) ifTrue: [ 
+	(nextSquare notNil and: [ nextSquare contents isPiece not ]) ifTrue: [
 		moves add: nextSquare.
 		
 		secondSquare := self isWhite 
-			ifTrue: [ nextSquare up ] 
-			ifFalse: [ nextSquare down ].
+			ifTrue: [ self square up ifNotNil: [ :sq | sq up ] ] 
+			ifFalse: [ self square down ifNotNil: [ :sq | sq down ] ].
 			
-		(self isUnmoved and: [ secondSquare notNil and: [ secondSquare hasPiece not ] ])
+		(self isUnmoved and: [ secondSquare notNil and: [ secondSquare contents isPiece not ] ])
 			ifTrue: [ moves add: secondSquare ] ].
 			
 	^ moves
@@ -76,7 +76,9 @@ MyPawn >> straightMoves [
 MyPawn >> targetSquares [
 	self square ifNil: [ ^ #() ].
 	self board ifNil: [ ^ #() ].
-	^ self straightMoves , self captureMoves
+	^ self targetSquaresLegal: true
+	
+
 ]
 
 { #category : 'rendering' }
@@ -87,5 +89,6 @@ MyPawn >> targetSquaresLegal: aBoolean [
 	"Si aBoolean est false (mode simulation de contrôle de roi / attaques), seul captureMoves compte"
 	aBoolean ifFalse: [ ^ self captureMoves ].
 
-	^ self straightMoves , self captureMoves
+	^ (self straightMoves , self captureMoves) select: [ :sq | 
+		self isKingSafe ]
 ]
